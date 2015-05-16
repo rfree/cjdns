@@ -57,3 +57,36 @@ Run this command as root after building (and every time you rebuild cjdroute):
 
     setcap "cap_net_admin+eip cap_net_raw+eip" cjdroute
 
+
+Grsecurity compatibility
+-----------------------------------------------------------------------------------
+The user building (and running?) cjdns seems to need exemption from TPE rules.
+The /usr/bin/nodejs (or other patch of nodejs binary) seems to need pax flags, e.g. "mr"
+
+
+Additional notes and examples
+-----------------------------------------------------------------------------------
+This seems to be needed (e.g. on Debian 7), run as root (at leasts once for given system):
+ln -s /usr/bin/nodejs /usr/bin/node
+
+
+Tun setup script (run as root after reboot). TODO(rfree)
+
+#!/bin/bash 
+# TODO(rfree) get the real internet card?
+IPv6=rootip a |  grep inet6 | tail -n 1 | awk '{print $2 }'root
+user="srv_cjdns"
+# TODO(rfree) cjdroute0 device then needs to be changed in cjdroute.conf
+
+echo "Setup network interface fo cjdns for user: $user with ip $IPv6"
+
+set -x
+/sbin/ip tuntap add mode tun user $user dev cjdroute0
+
+/sbin/ip addr add $IPv6 dev cjdroute0
+/sbin/ip link set mtu 1312 dev cjdroute0
+/sbin/ip link set cjdroute0 up
+set +x
+
+ip a
+
