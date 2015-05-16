@@ -92,12 +92,15 @@ static void checkInterfaceUp(int socket,
     }
 
     Log_info(logger, "Bringing up interface [%s]", ifRequest->ifr_name);
+    Log_warn(logger, "Bringing up interface [%s]", ifRequest->ifr_name); // XXX TODO(rfree) temp debug
 
+    Log_warn(logger, "Flags A [%s]", ifRequest->ifr_flags); // XXX TODO(rfree) temp debug
     ifRequest->ifr_flags |= IFF_UP | IFF_RUNNING;
+    Log_warn(logger, "Flags B [%s]", ifRequest->ifr_flags); // XXX TODO(rfree) temp debug
     if (ioctl(socket, SIOCSIFFLAGS, ifRequest) < 0) {
         int err = errno;
         close(socket);
-        Except_throw(eh, "ioctl(SIOCSIFFLAGS) [%s]", strerror(err));
+        Except_throw(eh, "ioctl(SIOCSIFFLAGS) [%s (%s)]", strerror(err), ifRequest->ifr_name);
     }
 }
 
